@@ -21,6 +21,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - mindstack_network       # ← LÍNEA AGREGADA
 
 volumes:
   postgres_data:
+
+networks:                       # ← BLOQUE AGREGADO
+  mindstack_network:
+    name: mindstack_network     # nombre fijo para que el backend lo encuentre
+    driver: bridge
