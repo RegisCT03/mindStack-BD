@@ -1,175 +1,929 @@
 {
-	"info": {
-		"_postman_id": "mindstack-api-v1-tests",
-		"name": "MindStack API - Plan de Pruebas",
-		"description": "Colección completa basada en el Plan de Pruebas v1.0 de Febrero 2026.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "M1 - Autenticación",
-			"item": [
-				{
-					"name": "TC-AUTH-01 Registrar Usuario (Trabajador)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const jsonData = pm.response.json();",
-									"if (pm.response.code === 201) {",
-									"    pm.environment.set(\"TOKEN\", jsonData.token);",
-									"    pm.environment.set(\"USER_ID\", jsonData.userId);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Ana\",\n    \"lastName\": \"López\",\n    \"email\": \"ana{{$randomInt}}@test.com\",\n    \"password\": \"Pass123!\",\n    \"idealSleepHours\": 8.0,\n    \"idRol\": 1\n}",
-							"options": { "raw": { "language": "json" } }
-						},
-						"url": { "raw": "{{BASE_URL}}/auth/register" }
-					}
-				},
-				{
-					"name": "TC-AUTH-03 Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const jsonData = pm.response.json();",
-									"if (pm.response.code === 200) {",
-									"    pm.environment.set(\"TOKEN\", jsonData.token);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"ana@test.com\",\n    \"password\": \"Pass123!\"\n}",
-							"options": { "raw": { "language": "json" } }
-						},
-						"url": { "raw": "{{BASE_URL}}/auth/login" }
-					}
-				}
-			]
-		},
-		{
-			"name": "M2 - Inicio de Sueño (Zzz)",
-			"item": [
-				{
-					"name": "TC-SLP-01 POST /sleep/start",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const jsonData = pm.response.json();",
-									"if (pm.response.code === 201) {",
-									"    pm.environment.set(\"CHECKIN_ID\", jsonData.checkinId);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
-						"method": "POST",
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"sleepStart\": \"2025-02-27T23:30:00\"\n}",
-							"options": { "raw": { "language": "json" } }
-						},
-						"url": { "raw": "{{BASE_URL}}/sleep/start" }
-					}
-				}
-			]
-		},
-		{
-			"name": "M3 - Fin de Sueño (Levantarse)",
-			"item": [
-				{
-					"name": "TC-END-01 PUT /sleep/end (Verde)",
-					"request": {
-						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
-						"method": "PUT",
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"sleepEnd\": \"2025-02-28T07:42:00\",\n    \"moodScore\": 5\n}",
-							"options": { "raw": { "language": "json" } }
-						},
-						"url": { "raw": "{{BASE_URL}}/sleep/{{CHECKIN_ID}}/end" }
-					}
-				}
-			]
-		},
-		{
-			"name": "M6 & M7 - Juegos",
-			"item": [
-				{
-					"name": "TC-TAP-01 Neuro-Reflex (Taptap)",
-					"request": {
-						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
-						"method": "POST",
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"idDailyCheckin\": {{CHECKIN_ID}},\n    \"reactionTime1Ms\": 240,\n    \"reactionTime2Ms\": 260,\n    \"reactionTime3Ms\": 250\n}",
-							"options": { "raw": { "language": "json" } }
-						},
-						"url": { "raw": "{{BASE_URL}}/games/neuro-reflex" }
-					}
-				},
-				{
-					"name": "TC-MEM-01 Memory (Memorama)",
-					"request": {
-						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
-						"method": "POST",
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"idDailyCheckin\": {{CHECKIN_ID}},\n    \"correctHits\": 5,\n    \"totalRequired\": 5\n}",
-							"options": { "raw": { "language": "json" } }
-						},
-						"url": { "raw": "{{BASE_URL}}/games/memory" }
-					}
-				}
-			]
-		},
-		{
-			"name": "M8 & M10 - Dashboards",
-			"item": [
-				{
-					"name": "TC-BAT-01 Consultar Batería Combinada",
-					"request": {
-						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
-						"method": "GET",
-						"url": { "raw": "{{BASE_URL}}/games/battery/{{CHECKIN_ID}}" }
-					}
-				},
-				{
-					"name": "TC-DSH-01 Dashboard General",
-					"request": {
-						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
-						"method": "GET",
-						"url": { "raw": "{{BASE_URL}}/dashboard" }
-					}
-				}
-			]
-		}
-	],
-	"variable": [
-		{ "key": "BASE_URL", "value": "http://localhost:8080/api/v1" }
-	]
+  "info": {
+    "name": "MindStack API",
+    "_postman_id": "mindstack-collection-v1",
+    "description": "Colección completa para probar la API de MindStack — Gestor de Energía Personal.\n\nFlujo recomendado:\n1. Auth → Register\n2. Auth → Login  (guarda token automáticamente)\n3. Sleep → Start (Zzz)\n4. Sleep → End (Levantarse)\n5. Games → Taptap\n6. Games → Memorama\n7. Games → Batería Combinada\n8. Dashboard / Streak / History",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",    "value": "http://localhost:8080/api/v1", "type": "string" },
+    { "key": "token",      "value": "",  "type": "string" },
+    { "key": "userId",     "value": "",  "type": "string" },
+    { "key": "userName",   "value": "",  "type": "string" },
+    { "key": "checkinId",  "value": "",  "type": "string" },
+    { "key": "sessionIdTaptap",   "value": "", "type": "string" },
+    { "key": "sessionIdMemory",   "value": "", "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "item": [
+
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('token',    body.token);",
+                  "  pm.collectionVariables.set('userId',   String(body.userId));",
+                  "  pm.collectionVariables.set('userName', body.name);",
+                  "  pm.test('Register OK — token guardado', () => pm.expect(body.token).to.be.a('string'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana\",\n  \"lastName\": \"García\",\n  \"email\": \"ana@test.com\",\n  \"password\": \"Test1234!\",\n  \"dateOfBirth\": \"2000-05-15\",\n  \"gender\": \"Femenino\",\n  \"idealSleepHours\": 8.0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "description": "Registra un usuario nuevo. Guarda token, userId y userName automáticamente en variables de colección."
+          }
+        },
+
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('token',    body.token);",
+                  "  pm.collectionVariables.set('userId',   String(body.userId));",
+                  "  pm.collectionVariables.set('userName', body.name);",
+                  "  pm.test('Login OK — token guardado', () => pm.expect(body.token).to.be.a('string'));",
+                  "  console.log('✅ Token:', body.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana@test.com\",\n  \"password\": \"Test1234!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "description": "Inicia sesión. El token JWT se guarda automáticamente para todas las siguientes peticiones."
+          }
+        },
+
+        {
+          "name": "Login — Credenciales Incorrectas (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechaza credenciales inválidas', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([400, 401]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana@test.com\",\n  \"password\": \"wrong_password\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "😴 Sleep (Zzz / Levantarse)",
+      "item": [
+
+        {
+          "name": "Start Sleep — Zzz",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('checkinId', String(body.checkinId));",
+                  "  pm.test('Sleep Start OK — checkinId guardado', () => pm.expect(body.checkinId).to.be.a('number'));",
+                  "  console.log('🛏️ checkinId:', body.checkinId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sleepStart\": \"2026-02-27T23:00:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/sleep/start", "host": ["{{baseUrl}}"], "path": ["sleep", "start"] },
+            "description": "Usuario presiona el botón 'Zzz'. Registra la hora de inicio de sueño. Guarda checkinId automáticamente."
+          }
+        },
+
+        {
+          "name": "Start Sleep — Duplicado mismo día (idempotente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sleepStart\": \"2026-02-27T23:30:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/sleep/start", "host": ["{{baseUrl}}"], "path": ["sleep", "start"] },
+            "description": "Verifica que si el usuario presiona Zzz dos veces en el mismo día, retorna el mismo checkinId sin crear un duplicado."
+          }
+        },
+
+        {
+          "name": "End Sleep — Levantarse (mood Verde)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('Sleep End OK', () => pm.expect(body.checkinId).to.be.a('number'));",
+                  "  pm.test('hoursSleep calculado', () => pm.expect(body.hoursSleep).to.be.above(0));",
+                  "  pm.test('semaforo presente', () => pm.expect(body.semaphore.color).to.be.oneOf(['GREEN','YELLOW','RED']));",
+                  "  pm.test('personalizedMessage presente', () => pm.expect(body.personalizedMessage.full).to.be.a('string'));",
+                  "  console.log('🚦 Semáforo:', body.semaphore.color, '| 🔋 Batería:', body.batteryCog);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sleepEnd\": \"2026-02-28T07:00:00\",\n  \"moodScore\": 4\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sleep/{{checkinId}}/end",
+              "host": ["{{baseUrl}}"],
+              "path": ["sleep", "{{checkinId}}", "end"]
+            },
+            "description": "Usuario presiona 'Levantarse'. Cierra el registro de sueño, calcula horas dormidas, semáforo y batería inicial. moodScore 1-5."
+          }
+        },
+
+        {
+          "name": "End Sleep — mood Rojo (moodScore 1, pocas horas)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sleepEnd\": \"2026-02-28T03:30:00\",\n  \"moodScore\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sleep/{{checkinId}}/end",
+              "host": ["{{baseUrl}}"],
+              "path": ["sleep", "{{checkinId}}", "end"]
+            },
+            "description": "Caso de prueba para semáforo ROJO: pocas horas de sueño + ánimo muy bajo."
+          }
+        },
+
+        {
+          "name": "End Sleep — moodScore inválido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechaza moodScore fuera de rango', () => {",
+                  "  pm.expect(pm.response.code).to.equal(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sleepEnd\": \"2026-02-28T07:00:00\",\n  \"moodScore\": 9\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sleep/{{checkinId}}/end",
+              "host": ["{{baseUrl}}"],
+              "path": ["sleep", "{{checkinId}}", "end"]
+            }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🎮 Games",
+      "item": [
+
+        {
+          "name": "Taptap — Reacción Rápida (batería alta)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('sessionIdTaptap', String(body.sessionId));",
+                  "  pm.test('Taptap OK', () => pm.expect(body.battery).to.be.within(0, 100));",
+                  "  pm.test('averageMs calculado', () => pm.expect(body.averageMs).to.be.a('number'));",
+                  "  console.log('⚡ TapTap avg:', body.averageMs, 'ms | 🔋 Battery:', body.battery);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idDailyCheckin\": {{checkinId}},\n  \"reactionTime1Ms\": 260.0,\n  \"reactionTime2Ms\": 280.0,\n  \"reactionTime3Ms\": 270.0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/games/neuro-reflex", "host": ["{{baseUrl}}"], "path": ["games", "neuro-reflex"] },
+            "description": "Juego A: Taptap. Envía los 3 tiempos de reacción en ms. Menor = mejor. 250ms → 100%, 650ms → 0%."
+          }
+        },
+
+        {
+          "name": "Taptap — Reacción Lenta (batería baja)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('sessionIdTaptap', String(body.sessionId));",
+                  "  pm.test('Battery baja para reacción lenta', () => pm.expect(body.battery).to.be.below(50));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idDailyCheckin\": {{checkinId}},\n  \"reactionTime1Ms\": 580.0,\n  \"reactionTime2Ms\": 620.0,\n  \"reactionTime3Ms\": 600.0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/games/neuro-reflex", "host": ["{{baseUrl}}"], "path": ["games", "neuro-reflex"] }
+          }
+        },
+
+        {
+          "name": "Memorama — Alta Precisión (100%)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('sessionIdMemory', String(body.sessionId));",
+                  "  pm.test('Memorama OK', () => pm.expect(body.accuracyPercent).to.equal(100));",
+                  "  pm.test('Battery alta para precisión perfecta', () => pm.expect(body.battery).to.equal(100));",
+                  "  console.log('🧠 Memorama accuracy:', body.accuracyPercent, '% | 🔋 Battery:', body.battery);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idDailyCheckin\": {{checkinId}},\n  \"correctHits\": 16,\n  \"totalRequired\": 16\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/games/memory", "host": ["{{baseUrl}}"], "path": ["games", "memory"] },
+            "description": "Juego B: Memorama. Precisión = (aciertos / totalRequired) * 100. Mayor = mejor."
+          }
+        },
+
+        {
+          "name": "Memorama — Precisión Media (62.5%)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('sessionIdMemory', String(body.sessionId));",
+                  "  pm.test('Memorama OK', () => pm.expect(body.accuracyPercent).to.be.closeTo(62.5, 0.1));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idDailyCheckin\": {{checkinId}},\n  \"correctHits\": 10,\n  \"totalRequired\": 16\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/games/memory", "host": ["{{baseUrl}}"], "path": ["games", "memory"] }
+          }
+        },
+
+        {
+          "name": "Memorama — correctHits > totalRequired (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechaza correctHits > totalRequired', () => {",
+                  "  pm.expect(pm.response.code).to.equal(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idDailyCheckin\": {{checkinId}},\n  \"correctHits\": 20,\n  \"totalRequired\": 16\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/games/memory", "host": ["{{baseUrl}}"], "path": ["games", "memory"] }
+          }
+        },
+
+        {
+          "name": "Batería Combinada (Semáforo × Juegos)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('finalBattery en rango', () => pm.expect(body.finalBattery).to.be.within(0, 100));",
+                  "  pm.test('fatiga + battery = 100', () => pm.expect(body.finalBattery + body.fatiga).to.equal(100));",
+                  "  pm.test('semaphoreColor válido', () => pm.expect(body.semaphoreColor).to.be.oneOf(['GREEN','YELLOW','RED']));",
+                  "  pm.test('personalizedMessage presente', () => pm.expect(body.personalizedMessage.full).to.be.a('string'));",
+                  "  console.log('🔋 Batería final:', body.finalBattery, '| 🚦', body.semaphoreColor, '| 💬', body.personalizedMessage.prefix);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/games/battery/{{checkinId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["games", "battery", "{{checkinId}}"]
+            },
+            "description": "Cruza el semáforo de sueño/ánimo con los resultados de los minijuegos para generar la batería cognitiva final y el mensaje personalizado según rol del usuario."
+          }
+        },
+
+        {
+          "name": "Batería — checkinId inválido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechaza checkinId no numérico', () => {",
+                  "  pm.expect(pm.response.code).to.equal(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/games/battery/abc", "host": ["{{baseUrl}}"], "path": ["games", "battery", "abc"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "📋 Check-in",
+      "item": [
+
+        {
+          "name": "Check-in de Hoy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 o 404', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const b = pm.response.json();",
+                  "  pm.test('hoursSleep > 0', () => pm.expect(b.hoursSleep).to.be.above(0));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/checkin/today", "host": ["{{baseUrl}}"], "path": ["checkin", "today"] },
+            "description": "Retorna el check-in completado del día actual (sleepEnd != null). 404 si no hay check-in cerrado hoy."
+          }
+        },
+
+        {
+          "name": "Historial Completo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "pm.test('Respuesta es array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/checkin/history", "host": ["{{baseUrl}}"], "path": ["checkin", "history"] },
+            "description": "Retorna todos los check-ins completados del usuario ordenados por fecha descendente."
+          }
+        },
+
+        {
+          "name": "Check-in Legacy (compatibilidad)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.expect(pm.response.code).to.equal(201));",
+                  "if (pm.response.code === 201) {",
+                  "  const b = pm.response.json();",
+                  "  pm.test('checkinId generado', () => pm.expect(b.checkinId).to.be.a('number'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sleepStart\": \"23:00\",\n  \"sleepEnd\": \"07:00\",\n  \"moodScore\": 4\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/checkin", "host": ["{{baseUrl}}"], "path": ["checkin"] },
+            "description": "Endpoint legacy. Acepta horarios en formato HH:mm (no ISO-8601). Mantener para compatibilidad hacia atrás."
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🏆 Racha (Streak)",
+      "item": [
+
+        {
+          "name": "Obtener Racha",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const b = pm.response.json();",
+                  "  pm.test('currentStreak >= 0', () => pm.expect(b.currentStreak).to.be.at.least(0));",
+                  "  pm.test('goalDays = 20', () => pm.expect(b.goalDays).to.equal(20));",
+                  "  pm.test('progressPercent en rango', () => pm.expect(b.progressPercent).to.be.within(0, 100));",
+                  "  console.log('🔥 Racha actual:', b.currentStreak, 'días | Meta:', b.goalDays, '| Progreso:', b.progressPercent + '%');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/streak", "host": ["{{baseUrl}}"], "path": ["streak"] },
+            "description": "Retorna la racha actual, racha más larga, total de días y progreso hacia la meta de 20 días."
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "📊 Dashboard",
+      "item": [
+
+        {
+          "name": "Dashboard Completo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const b = pm.response.json();",
+                  "  pm.test('streak presente', () => pm.expect(b.streak).to.be.an('object'));",
+                  "  pm.test('weekSleepAvgHours numérico', () => pm.expect(b.weekSleepAvgHours).to.be.a('number'));",
+                  "  pm.test('hasPendingSleepStart es booleano', () => pm.expect(b.hasPendingSleepStart).to.be.a('boolean'));",
+                  "  console.log('📊 Dashboard OK | Zzz pendiente:', b.hasPendingSleepStart, '| Promedio semanal:', b.weekSleepAvgHours.toFixed(1), 'h');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/dashboard", "host": ["{{baseUrl}}"], "path": ["dashboard"] },
+            "description": "Dashboard completo: check-in de hoy, racha, promedios semanales de sueño y batería, y estado del botón Zzz."
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🔒 Seguridad",
+      "item": [
+
+        {
+          "name": "Sin token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechaza petición sin token', () => {",
+                  "  pm.expect(pm.response.code).to.equal(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/dashboard", "host": ["{{baseUrl}}"], "path": ["dashboard"] }
+          }
+        },
+
+        {
+          "name": "Token inválido (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechaza token falso', () => {",
+                  "  pm.expect(pm.response.code).to.equal(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer token.falso.invalido" }],
+            "url": { "raw": "{{baseUrl}}/streak", "host": ["{{baseUrl}}"], "path": ["streak"] }
+          }
+        },
+
+        {
+          "name": "Acceso a checkin ajeno (400/403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Rechaza acceso a recurso de otro usuario', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([400, 403, 404]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/games/battery/99999", "host": ["{{baseUrl}}"], "path": ["games", "battery", "99999"] },
+            "description": "Intenta acceder a la batería de un checkinId que no pertenece al usuario autenticado."
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🔄 Flujo Completo (E2E)",
+      "description": "Ejecutar esta carpeta en orden simula un día completo de uso de la app.",
+      "item": [
+
+        {
+          "name": "E2E-1: Register nuevo usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set('token', b.token);",
+                  "pm.collectionVariables.set('userId', String(b.userId));",
+                  "pm.test('E2E Register OK', () => pm.expect(pm.response.code).to.equal(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Carlos\",\n  \"lastName\": \"E2E\",\n  \"email\": \"e2e_{{$timestamp}}@test.com\",\n  \"password\": \"E2Etest99!\",\n  \"idealSleepHours\": 7.5\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+
+        {
+          "name": "E2E-2: Start Sleep",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set('checkinId', String(b.checkinId));",
+                  "pm.test('E2E Sleep Start OK', () => pm.expect(pm.response.code).to.equal(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"sleepStart\": \"2026-02-27T22:30:00\"\n}" },
+            "url": { "raw": "{{baseUrl}}/sleep/start", "host": ["{{baseUrl}}"], "path": ["sleep", "start"] }
+          }
+        },
+
+        {
+          "name": "E2E-3: End Sleep (8h, mood 4)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('E2E Sleep End OK', () => pm.expect(pm.response.code).to.equal(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('Semáforo asignado', () => pm.expect(['GREEN','YELLOW','RED']).to.include(b.semaphore.color));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"sleepEnd\": \"2026-02-28T06:30:00\",\n  \"moodScore\": 4\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/sleep/{{checkinId}}/end",
+              "host": ["{{baseUrl}}"],
+              "path": ["sleep", "{{checkinId}}", "end"]
+            }
+          }
+        },
+
+        {
+          "name": "E2E-4: Jugar Taptap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('E2E Taptap OK', () => pm.expect(pm.response.code).to.equal(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"idDailyCheckin\": {{checkinId}},\n  \"reactionTime1Ms\": 290.0,\n  \"reactionTime2Ms\": 310.0,\n  \"reactionTime3Ms\": 300.0\n}" },
+            "url": { "raw": "{{baseUrl}}/games/neuro-reflex", "host": ["{{baseUrl}}"], "path": ["games", "neuro-reflex"] }
+          }
+        },
+
+        {
+          "name": "E2E-5: Jugar Memorama",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('E2E Memorama OK', () => pm.expect(pm.response.code).to.equal(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"idDailyCheckin\": {{checkinId}},\n  \"correctHits\": 14,\n  \"totalRequired\": 16\n}" },
+            "url": { "raw": "{{baseUrl}}/games/memory", "host": ["{{baseUrl}}"], "path": ["games", "memory"] }
+          }
+        },
+
+        {
+          "name": "E2E-6: Ver Batería Combinada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('E2E Batería OK', () => pm.expect(pm.response.code).to.equal(200));",
+                  "const b = pm.response.json();",
+                  "console.log('✅ E2E completo | 🔋', b.finalBattery, '% | 🚦', b.semaphoreColor, '| 💬', b.personalizedMessage.prefix);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/games/battery/{{checkinId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["games", "battery", "{{checkinId}}"]
+            }
+          }
+        },
+
+        {
+          "name": "E2E-7: Dashboard final",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('E2E Dashboard OK', () => pm.expect(pm.response.code).to.equal(200));",
+                  "pm.test('hasPendingSleepStart = false (cerrado)', () => {",
+                  "  pm.expect(pm.response.json().hasPendingSleepStart).to.equal(false);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/dashboard", "host": ["{{baseUrl}}"], "path": ["dashboard"] }
+          }
+        },
+
+        {
+          "name": "E2E-8: Racha del día",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('E2E Streak OK', () => pm.expect(pm.response.code).to.equal(200));",
+                  "pm.test('currentStreak >= 1 tras check-in', () => {",
+                  "  pm.expect(pm.response.json().currentStreak).to.be.at.least(1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/streak", "host": ["{{baseUrl}}"], "path": ["streak"] }
+          }
+        }
+
+      ]
+    }
+
+  ]
 }

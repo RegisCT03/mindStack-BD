@@ -24,7 +24,7 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     date_of_birth DATE,
     gender VARCHAR(100),
     id_rol INTEGER REFERENCES rol(id),
@@ -34,10 +34,10 @@ CREATE TABLE users (
 
 CREATE TABLE streaks_history (
     id SERIAL PRIMARY KEY,
-    id_user INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     start_date DATE NOT NULL,
     end_date DATE,
-    days_count INT DEFAULT 0
+    days_count INT DEFAULT 1
 );
 
 CREATE TABLE daily_checkin (
@@ -68,6 +68,7 @@ CREATE TABLE game_sessions (
 CREATE TABLE message (
     id SERIAL PRIMARY KEY,
     id_daily_checkin INTEGER REFERENCES daily_checkin(id) ON DELETE CASCADE,
-    message VARCHAR(255) NOT NULL,
+    id_game_session  INTEGER REFERENCES game_sessions(id) ON DELETE CASCADE,
+    message VARCHAR(500) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
