@@ -16,5 +16,5 @@ INSERT INTO semaforo (color, description) VALUES
 ('Rojo', 'Peligro: Agotamiento o alta deuda de sueño. Priorizar descanso inmediato.');
 
 INSERT INTO game (name) VALUES
-('Memorama'), 
-('Taptap')
+('Taptap'),
+('Memorama');
