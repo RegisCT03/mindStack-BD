@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "mindstack-api-v1-tests",
+		"name": "MindStack API - Plan de Pruebas",
+		"description": "Colección completa basada en el Plan de Pruebas v1.0 de Febrero 2026.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "M1 - Autenticación",
+			"item": [
+				{
+					"name": "TC-AUTH-01 Registrar Usuario (Trabajador)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"if (pm.response.code === 201) {",
+									"    pm.environment.set(\"TOKEN\", jsonData.token);",
+									"    pm.environment.set(\"USER_ID\", jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Ana\",\n    \"lastName\": \"López\",\n    \"email\": \"ana{{$randomInt}}@test.com\",\n    \"password\": \"Pass123!\",\n    \"idealSleepHours\": 8.0,\n    \"idRol\": 1\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/auth/register" }
+					}
+				},
+				{
+					"name": "TC-AUTH-03 Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"if (pm.response.code === 200) {",
+									"    pm.environment.set(\"TOKEN\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ana@test.com\",\n    \"password\": \"Pass123!\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/auth/login" }
+					}
+				}
+			]
+		},
+		{
+			"name": "M2 - Inicio de Sueño (Zzz)",
+			"item": [
+				{
+					"name": "TC-SLP-01 POST /sleep/start",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"if (pm.response.code === 201) {",
+									"    pm.environment.set(\"CHECKIN_ID\", jsonData.checkinId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sleepStart\": \"2025-02-27T23:30:00\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/sleep/start" }
+					}
+				}
+			]
+		},
+		{
+			"name": "M3 - Fin de Sueño (Levantarse)",
+			"item": [
+				{
+					"name": "TC-END-01 PUT /sleep/end (Verde)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
+						"method": "PUT",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sleepEnd\": \"2025-02-28T07:42:00\",\n    \"moodScore\": 5\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/sleep/{{CHECKIN_ID}}/end" }
+					}
+				}
+			]
+		},
+		{
+			"name": "M6 & M7 - Juegos",
+			"item": [
+				{
+					"name": "TC-TAP-01 Neuro-Reflex (Taptap)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idDailyCheckin\": {{CHECKIN_ID}},\n    \"reactionTime1Ms\": 240,\n    \"reactionTime2Ms\": 260,\n    \"reactionTime3Ms\": 250\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/games/neuro-reflex" }
+					}
+				},
+				{
+					"name": "TC-MEM-01 Memory (Memorama)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idDailyCheckin\": {{CHECKIN_ID}},\n    \"correctHits\": 5,\n    \"totalRequired\": 5\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{BASE_URL}}/games/memory" }
+					}
+				}
+			]
+		},
+		{
+			"name": "M8 & M10 - Dashboards",
+			"item": [
+				{
+					"name": "TC-BAT-01 Consultar Batería Combinada",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{BASE_URL}}/games/battery/{{CHECKIN_ID}}" }
+					}
+				},
+				{
+					"name": "TC-DSH-01 Dashboard General",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{TOKEN}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{BASE_URL}}/dashboard" }
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "BASE_URL", "value": "http://localhost:8080/api/v1" }
+	]
+}

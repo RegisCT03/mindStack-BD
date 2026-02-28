@@ -19,14 +19,6 @@ CREATE TABLE game (
     name VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE streaks_history (
-    id SERIAL PRIMARY KEY,
-    id_user INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    start_date DATE NOT NULL,
-    end_date DATE,
-    days_count INT DEFAULT 0
-);
-
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -36,17 +28,23 @@ CREATE TABLE users (
     date_of_birth DATE,
     gender VARCHAR(100),
     id_rol INTEGER REFERENCES rol(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ideal_sleep_hours FLOAT DEFAULT 8.0
 );
 
-ALTER TABLE streaks_history ADD CONSTRAINT fk_user_streaks 
-FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE CASCADE;
+CREATE TABLE streaks_history (
+    id SERIAL PRIMARY KEY,
+    id_user INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    start_date DATE NOT NULL,
+    end_date DATE,
+    days_count INT DEFAULT 0
+);
 
 CREATE TABLE daily_checkin (
     id SERIAL PRIMARY KEY,
     id_user INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    sleep_start TIME,
-    sleep_end TIME,
+    sleep_start VARCHAR(100),
+    sleep_end VARCHAR(100),
     hours_sleep FLOAT,
     id_mood INTEGER REFERENCES mood(id),
     id_semaphore INTEGER REFERENCES semaphore(id),
