@@ -10,7 +10,7 @@ INSERT INTO mood (mood) VALUES
 ('Feliz'), 
 ('Excelente');
 
-INSERT INTO semaforo (color, description) VALUES 
+INSERT INTO semaphore (color, description) VALUES 
 ('Verde', 'Óptimo: Alta capacidad cognitiva y bajo estrés.'),
 ('Amarillo', 'Precaución: Fatiga moderada o estrés acumulado. Necesita descanso leve.'),
 ('Rojo', 'Peligro: Agotamiento o alta deuda de sueño. Priorizar descanso inmediato.');
