@@ -63,61 +63,86 @@ LEFT JOIN streaks_history sh ON u.id = sh.user_id
 GROUP BY u.id, u.name, u.last_name;
 
 CREATE OR REPLACE VIEW vw_hipotesis_correlacion AS
-WITH checkins_ultimos10 AS (
+WITH semana1 AS (
     SELECT
-        sr.id_user,
-        sr.streak_milestone,
-        sr.answers,
-        AVG(dc.battery_cog) AS avg_bateria_real,
-        AVG(dc.fatigue) AS avg_fatiga_real,
-        COUNT(CASE WHEN s.color = 'Verde'    THEN 1 END) AS dias_verde,
-        COUNT(CASE WHEN s.color = 'Amarillo' THEN 1 END) AS dias_amarillo,
-        COUNT(CASE WHEN s.color = 'Rojo'     THEN 1 END) AS dias_rojo,
-        COUNT(dc.id) AS total_checkins_periodo
-    FROM survey_response sr
-    JOIN daily_checkin dc
-      ON dc.id_user = sr.id_user
-     AND dc.date_time >= (sr.answered_at - INTERVAL '10 days')
-     AND dc.date_time <= sr.answered_at
-    LEFT JOIN semaphore s ON dc.id_semaphore = s.id
-    GROUP BY sr.id_user, sr.streak_milestone, sr.answers
+        dc.id_user,
+        MIN(dc.date_time::DATE) AS fecha_inicio,
+        AVG(dc.fatigue) AS fatiga_semana1,
+        AVG(dc.battery_cog) AS bateria_semana1,
+        COUNT(dc.id) AS checkins_semana1
+    FROM daily_checkin dc
+    WHERE dc.date_time::DATE <= (
+        SELECT MIN(dc2.date_time::DATE) + INTERVAL '6 days'
+        FROM daily_checkin dc2
+        WHERE dc2.id_user = dc.id_user
+    )
+    GROUP BY dc.id_user
+),
+semana_reciente AS (
+    SELECT
+        dc.id_user,
+        MAX(dc.date_time::DATE) AS fecha_ultimo,
+        AVG(dc.fatigue) AS fatiga_reciente,
+        AVG(dc.battery_cog) AS bateria_reciente,
+        COUNT(dc.id) AS checkins_recientes
+    FROM daily_checkin dc
+    WHERE dc.date_time::DATE >= (
+        SELECT MAX(dc2.date_time::DATE) - INTERVAL '6 days'
+        FROM daily_checkin dc2
+        WHERE dc2.id_user = dc.id_user
+    )
+    GROUP BY dc.id_user
+),
+cumplimiento_descanso AS (
+    SELECT
+        id_user,
+        COUNT(*) AS total_encuestas,
+        COUNT(CASE WHEN (answers->>'q2')::INTEGER >= 4 THEN 1 END) AS encuestas_con_cumplimiento,
+        ROUND(
+            COUNT(CASE WHEN (answers->>'q2')::INTEGER >= 4 THEN 1 END)::NUMERIC
+            / NULLIF(COUNT(*), 0) * 100
+        , 1) AS tasa_cumplimiento_pct
+    FROM survey_response
+    WHERE answers ? 'q2'
+    GROUP BY id_user
 )
 SELECT
-    c.id_user AS user_id,
+    u.id AS user_id,
     CONCAT(u.name, ' ', u.last_name) AS nombre_usuario,
-    c.streak_milestone AS hito_dias,
-    ROUND(c.avg_bateria_real::NUMERIC, 2) AS bateria_promedio_10d,
-    ROUND(c.avg_fatiga_real::NUMERIC, 2) AS fatiga_promedio_10d,
-    c.dias_verde,
-    c.dias_amarillo,
-    c.dias_rojo,
-    c.total_checkins_periodo,
-    (c.answers->>'q1')::INTEGER  AS semaforo_coincide_cansancio,
-    (c.answers->>'q2')::INTEGER AS modifico_actividades,
-    (c.answers->>'q3')::INTEGER AS precision_minijuegos,
-    (c.answers->>'q4')::INTEGER AS intento_dormir_mas,
-    (c.answers->>'q5')::INTEGER AS ayudo_evitar_burnout,
-
+    ROUND(s1.fatiga_semana1::NUMERIC, 2) AS fatiga_semana1,
+    ROUND(sr.fatiga_reciente::NUMERIC, 2) AS fatiga_reciente,
     ROUND(
-        ((c.answers->>'q1')::NUMERIC +
-         (c.answers->>'q2')::NUMERIC +
-         (c.answers->>'q3')::NUMERIC +
-         (c.answers->>'q4')::NUMERIC +
-         (c.answers->>'q5')::NUMERIC) / 5.0
-    , 2) AS satisfaccion_promedio,
+        ((s1.fatiga_semana1 - sr.fatiga_reciente)
+         / NULLIF(s1.fatiga_semana1, 0)) * 100
+    , 1) AS reduccion_fatiga_pct,
+
+    ROUND(s1.bateria_semana1::NUMERIC, 2) AS bateria_semana1,
+    ROUND(sr.bateria_reciente::NUMERIC, 2) AS bateria_reciente,
+
+    COALESCE(cd.total_encuestas, 0) AS total_encuestas,
+    COALESCE(cd.tasa_cumplimiento_pct, 0) AS tasa_cumplimiento_pct,
+
+    CASE WHEN COALESCE(cd.tasa_cumplimiento_pct, 0) > 70
+         THEN 'Sí' ELSE 'No'
+    END AS cumple_A_cumplimiento,
+
+    CASE WHEN sr.fatiga_reciente <= s1.fatiga_semana1 * 0.75
+         THEN 'Sí' ELSE 'No'
+    END AS cumple_B_reduccion_fatiga,
 
     CASE
-        WHEN ROUND(((c.answers->>'q1')::NUMERIC + (c.answers->>'q2')::NUMERIC +
-                    (c.answers->>'q3')::NUMERIC + (c.answers->>'q4')::NUMERIC +
-                    (c.answers->>'q5')::NUMERIC) / 5.0, 2) >= 3.5
-             AND c.avg_fatiga_real <= 60
+        WHEN COALESCE(cd.tasa_cumplimiento_pct, 0) > 70
+         AND sr.fatiga_reciente <= s1.fatiga_semana1 * 0.75
         THEN 'Hipótesis VALIDADA'
-        WHEN ROUND(((c.answers->>'q1')::NUMERIC + (c.answers->>'q2')::NUMERIC +
-                    (c.answers->>'q3')::NUMERIC + (c.answers->>'q4')::NUMERIC +
-                    (c.answers->>'q5')::NUMERIC) / 5.0, 2) >= 3.5
-        THEN 'Satisfacción alta, fatiga sin reducción significativa'
-        ELSE 'Hipótesis NO validada en este hito'
+        WHEN COALESCE(cd.tasa_cumplimiento_pct, 0) > 70
+        THEN 'Solo cumple condición A (cumplimiento)'
+        WHEN sr.fatiga_reciente <= s1.fatiga_semana1 * 0.75
+        THEN 'Solo cumple condición B (reducción de fatiga)'
+        ELSE 'Hipótesis NO validada'
     END AS resultado_hipotesis
 
-FROM checkins_ultimos10 c
-JOIN users u ON c.id_user = u.id;
+FROM users u
+JOIN semana1 s1 ON u.id = s1.id_user
+JOIN semana_reciente sr ON u.id = sr.id_user
+LEFT JOIN cumplimiento_descanso cd ON u.id = cd.id_user
+WHERE s1.fecha_inicio < sr.fecha_ultimo - INTERVAL '7 days';
