@@ -1,4 +1,3 @@
-stored_process
 CREATE OR REPLACE PROCEDURE sp_registrar_checkin(
     p_user_id INTEGER,
     p_sleep_start VARCHAR(100),
